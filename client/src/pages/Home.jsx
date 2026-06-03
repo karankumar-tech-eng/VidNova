@@ -1,8 +1,22 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import videos from "../data/videos";
+import defaultVideos from "../data/videos";
 
 function Home() {
+  const [videos, setVideos] = useState(defaultVideos);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/videos")
+      .then((res) => res.json())
+      .then((uploadedVideos) => {
+        setVideos([...uploadedVideos, ...defaultVideos]);
+      })
+      .catch((err) => {
+        console.log("Backend not connected", err);
+      });
+  }, []);
+
   return (
     <div className="app">
       <Navbar />
@@ -29,7 +43,9 @@ function Home() {
 
           <div className="hero-buttons">
             <button className="primary-btn">Start Watching</button>
-            <button className="secondary-btn">Upload Video</button>
+            <Link to="/upload">
+              <button className="secondary-btn">Upload Video</button>
+            </Link>
           </div>
         </div>
 
@@ -44,7 +60,7 @@ function Home() {
       </section>
 
       <section className="section">
-        <h2>Trending Videos</h2>
+        <h2>Trending & Uploaded Videos</h2>
 
         <div className="video-grid">
           {videos.map((video) => (

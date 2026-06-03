@@ -1,12 +1,40 @@
 import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import videos from "../data/videos";
+import defaultVideos from "../data/videos";
 
 function VideoWatch() {
   const { id } = useParams();
 
-  const video = videos.find((item) => item.id === Number(id));
-  const relatedVideos = videos.filter((item) => item.id !== Number(id));
+  const [videos, setVideos] = useState(defaultVideos);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/videos")
+      .then((res) => res.json())
+      .then((uploadedVideos) => {
+        setVideos([...uploadedVideos, ...defaultVideos]);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log("Backend not connected", err);
+        setLoading(false);
+      });
+  }, []);
+
+  const video = videos.find((item) => String(item.id) === String(id));
+  const relatedVideos = videos.filter((item) => String(item.id) !== String(id));
+
+  if (loading) {
+    return (
+      <div className="app">
+        <Navbar />
+        <div className="not-found">
+          <h1>Loading video...</h1>
+        </div>
+      </div>
+    );
+  }
 
   if (!video) {
     return (
@@ -45,9 +73,7 @@ function VideoWatch() {
           </div>
 
           <div className="creator-box">
-            <div className="creator-avatar">
-              {video.creator.charAt(0)}
-            </div>
+            <div className="creator-avatar">{video.creator.charAt(0)}</div>
 
             <div>
               <h3>{video.creator}</h3>
